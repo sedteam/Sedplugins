@@ -4,8 +4,8 @@ Add forums.sections.tpl
 <div class="table-cells forums-table forums-main-table">
 
 	<div class="table-thead forums-table-head">
-		<div class="table-td coltop"><a href="/plug?e=forumstats">{PHP.L.Statistics}</a></div>
-		<div class="table-td coltop"><a href="/plug/whosonline">{PHP.skinlang.index.Online}</a></div>
+		<div class="table-td coltop"><a href="plug/forumstats">{PHP.L.Statistics}</a></div>
+		<div class="table-td coltop"><a href="plug/whosonline">{PHP.skinlang.index.Online}</a></div>
 	</div>	
 
 	<div class="table-tbody">
