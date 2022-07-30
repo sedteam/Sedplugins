@@ -3,16 +3,16 @@ Add in page.tpl
 
 <!-- BEGIN: PAGE_GALLERY -->
 <div class="page-other">
-	
-    <div class="box-title">
+
+	<div class="box-title">
 		<h3>{PHP.L.Gallery}</h3>
 	</div>
     	
 	<div class="page-other-body">	
 		
-        <div class="row row-flex">			
+        	<div class="row row-flex">			
 			
-            <!-- BEGIN: PAGE_GALLERY_ROW -->
+           		 <!-- BEGIN: PAGE_GALLERY_ROW -->
             			
 				<div class="col-xs-12 col-sm-6 col-md-3 col-lg-4 gallery-item">					
 					<figure class="gallery-container">
