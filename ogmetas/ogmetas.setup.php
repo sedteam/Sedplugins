@@ -24,8 +24,8 @@ Author=Amro
 Copyright=Amro
 Notes=
 SQL=
-Auth_guests=0
-Lock_guests=RW12345A
+Auth_guests=R
+Lock_guests=W12345A
 Auth_members=R
 Lock_members=W12345A
 [END_SED_EXTPLUGIN]
