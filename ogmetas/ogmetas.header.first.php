@@ -51,6 +51,6 @@ $moremetas .= "
 		<meta name=\"twitter:card\" content=\"summary\" />
 		<meta name=\"twitter:description\" content=\"".$og_description."\" />
 		<meta name=\"twitter:title\" content=\"".$out['subtitle']."\" />
-		<meta name=\"twitter:image\" content=\"".$out['image']."\" />\n";
+		<meta name=\"twitter:image\" content=\"".$sys['abs_url'].$out['image']."\" />\n";
 
 ?>
