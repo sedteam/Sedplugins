@@ -1,0 +1,121 @@
+.table-of-contents {
+    background: #f2f5f9;
+    margin-bottom: 30px
+}
+
+.table-of-contents__header {
+    padding: 15px 30px;
+    font-weight: 700;
+    font-size: 1.1em
+}
+
+.table-of-contents__hide {
+    cursor: pointer
+}
+
+.table-of-contents__hide:after {
+    content: "﹀";
+    margin-left: 12px
+}
+
+.table-of-contents__hide:hover {
+    opacity: .9
+}
+
+.table-of-contents.open .table-of-contents__list {
+    display: block
+}
+
+.table-of-contents.open .table-of-contents__hide:after {
+    content: "︿"
+}
+
+.table-of-contents ol {
+    margin: 0 30px 0;
+    padding: 0 0 15px 0;
+    list-style: none
+}
+
+.table-of-contents ol li {
+    padding-left: 0;
+    margin-bottom: 0
+}
+
+.table-of-contents ol li a {
+    text-decoration: none
+}
+
+.table-of-contents ol li:before {
+    display: inline-block;
+    content: counter(point) ". ";
+    opacity: .5;
+    margin-right: 5px;
+    margin-left: 0
+}
+
+.table-of-contents ol .level-1 {
+    counter-increment: point;
+    counter-reset: sublist;
+    margin-top: .4em;
+    margin-bottom: .2em
+}
+
+.table-of-contents ol .level-1:before {
+    width: 1.6em
+}
+
+.table-of-contents ol .level-2 {
+    counter-reset: sublist3;
+    font-size: .92em;
+    margin-top: .3em;
+    margin-bottom: .3em;
+    margin-left: 30px
+}
+
+.table-of-contents ol .level-2:before {
+    content: counter(point) "." counter(sublist) ". ";
+    counter-increment: sublist;
+    width: 2.5em
+}
+
+.table-of-contents ol .level-3 {
+    counter-reset: sublist4;
+    font-size: .88em;
+    margin-top: .3em;
+    margin-bottom: .7em;
+    margin-left: 70px
+}
+
+.table-of-contents ol .level-3:before {
+    content: counter(point) "." counter(sublist) "." counter(sublist3) ". ";
+    counter-increment: sublist3;
+    width: 3.3em
+}
+
+.table-of-contents ol .level-4 {
+    counter-reset: sublist5;
+    font-size: .8em;
+    margin-top: .3em;
+    margin-bottom: .7em;
+    margin-left: 120px
+}
+
+.table-of-contents ol .level-4:before {
+    content: counter(point) "." counter(sublist) "." counter(sublist3) "." counter(sublist4) ". ";
+    counter-increment: sublist4;
+    width: 3.8em
+}
+
+.table-of-contents ol .level-5 {
+    counter-reset: sublist6;
+    font-size: .75em;
+    margin-top: .3em;
+    margin-bottom: .7em;
+    margin-left: 175px
+}
+
+.table-of-contents ol .level-5:before {
+    content: counter(point) "." counter(sublist) "." counter(sublist3) "." counter(sublist4) "." counter(sublist5) ". ";
+    counter-increment: sublist5;
+    width: 4.8em
+}
