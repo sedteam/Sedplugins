@@ -40,11 +40,11 @@ $success_string = '';
 $kt = new XTemplate(sed_skinfile('karma', true));
 
 $kt->assign(array(
-	"KARMA_TITLE" => $L['plu_title']
+	"KARMA_TITLE" => $L['karma_title']
 ));
 
 if (empty($fp)) { 
-	sed_diefatal($L['no_fp']); 
+	sed_diefatal($L['karma_no_fp']); 
 }
 
 $sql = sed_sql_query("SELECT COUNT(*) FROM $db_forum_posts WHERE fp_posterid = ".(int)$usr['id']);
@@ -61,28 +61,28 @@ switch ($act) {
 		} elseif ($a == "del") {
 			$do = $L['karma_del'];
 		} else {
-			sed_diefatal($L['no_karma']);
+			sed_diefatal($L['karma_no_karma']);
 		}
 
 		$sql = sed_sql_query("SELECT f.fp_id, f.fp_text, f.fp_postername, u.user_name, u.user_id FROM sed_forum_posts f LEFT JOIN sed_users u ON (f.fp_posterid=u.user_id) WHERE f.fp_id = '".(int)$fp."' LIMIT 1");
 		$row = sed_sql_fetchassoc($sql);
 
 		if ($usr['id'] == $row['user_id']) {
-			$error_string .= $L['no_self'] . "<br />";
+			$error_string .= $L['karma_no_self'] . "<br />";
 			break;
 		}
 
 		$sql_check_fp = sed_sql_query("SELECT COUNT(*) FROM sed_karma WHERE karma_rater = ".(int)$usr['id']." AND karma_fp = '$fp' AND karma_recipient = '" . $row['user_id'] . "'");
 		if (sed_sql_result($sql_check_fp, 0, 'COUNT(*)') > 0) {
-			$error_string .= $L['no_repeat'] . "<br />";
+			$error_string .= $L['karma_no_repeat'] . "<br />";
 			break;
 		}
 
 		$fp_text = "<blockquote><a href=\"" . sed_url("forums", "m=posts&p=" . $row['fp_id'], "#" . $row['fp_id']) . "\">#" . $row['fp_id'] . "</a> <strong>" . $row['fp_postername'] . " :</strong><br />" . $row['fp_text'] . "</blockquote>";
 
 		$kt->assign(array(
-			"KARMA_CHANGE_TITLE" => $L['plu_title'],
-			"KARMA_CHANGE_SUBTITLE" => $L['do_1'] . " " . $do . " " . $L['do_2']. " <strong>" . $row['user_name']. "</strong> " . $L['do_3'],
+			"KARMA_CHANGE_TITLE" => $L['karma_title'],
+			"KARMA_CHANGE_SUBTITLE" => $L['karma_do_1'] . " " . $do . " " . $L['karma_do_2']. " <strong>" . $row['user_name']. "</strong> " . $L['karma_do_3'],
 			"KARMA_CHANGE_FORM_SEND" => sed_url("plug", "o=karma&act=dochange&fp=" . $fp),
 			"KARMA_CHANGE_FP_TEXT" => $fp_text,
 			"KARMA_CHANGE_REASON_MESSAGE" => sed_textarea('reason', isset($reason) ? $reason : '', 5, 60, 'noeditor') . sed_textbox_hidden('recipient', $row['user_id']) . sed_textbox_hidden('a', $a)
@@ -99,12 +99,12 @@ switch ($act) {
 		$recipient = sed_import('recipient', 'P', 'INT');
 		
 		if (empty($reason)) {
-			$error_string .= $L['no_comm'] . "<br />";
+			$error_string .= $L['karma_no_comm'] . "<br />";
 			break;
 		} 
 		
 		if (empty($reason)) {
-			$error_string .= $L['no_recipient'] . "<br />";
+			$error_string .= $L['karma_no_recipient'] . "<br />";
 			break;
 		}
 
@@ -113,18 +113,18 @@ switch ($act) {
 		} elseif ($a == "del") {
 			$karma_value = "-1";
 		} else {
-			sed_diefatal($L['no_karma']);
+			sed_diefatal($L['karma_no_karma']);
 		}
 
 		if ($usr['id'] == $recipient) {
-			$error_string .= $L['no_self'] . "<br />";
+			$error_string .= $L['karma_no_self'] . "<br />";
 			break;
 		}
 
 		$sql_check_fp = sed_sql_query("SELECT COUNT(*) FROM sed_karma WHERE karma_rater = ".(int)$usr['id']." AND karma_fp = '".(int)$fp."' AND karma_recipient = '".(int)$recipient."'");
 
 		if (sed_sql_result($sql_check_fp, 0, 'COUNT(*)') >= 1) {
-			$error_string .= $L['no_repeat'] . "<br />";
+			$error_string .= $L['karma_no_repeat'] . "<br />";
 			break;
 		}
 
@@ -153,10 +153,10 @@ switch ($act) {
 			('0', 
 			'" . (int)$sys['now_offset'] . "', 
 			'0', 
-			'" . sed_sql_prep($L['plu_pmnotify']) . "', 
+			'" . sed_sql_prep($L['karma_pmnotify']) . "', 
 			'" . (int)$recipient . "', 
-			'" . sed_sql_prep($L['plu_pmtitle']) . "', 
-			'" . sed_sql_prep($L['plu_pmtext']) . "')");		
+			'" . sed_sql_prep($L['karma_pmtitle']) . "', 
+			'" . sed_sql_prep($L['karma_pmtext']) . "')");		
 			
 		sed_stat_inc('totalpms');
 		
@@ -173,7 +173,7 @@ switch ($act) {
 	case 'moderate':
 
 		if (!$usr['isadmin']) {
-			sed_diefatal($L['low_level']);
+			sed_diefatal($L['karma_low_level']);
 		}
 		
 		$sqlrecip = sed_sql_query("SELECT karma_recipient FROM sed_karma WHERE karma_id = '".(int)$fp."' AND karma_recipient != '".$usr['id']."' LIMIT 1");
@@ -196,7 +196,7 @@ switch ($act) {
 
 	case 'minpost':
 
-		$error_string .= str_replace("{minpost}", $cfg['plugin']['karma']['minpost'], $L['no_minpost']) . "<br />";
+		$error_string .= str_replace("{minpost}", $cfg['plugin']['karma']['minpost'], $L['karma_no_minpost']) . "<br />";
 		break;
 
 	case 'show':

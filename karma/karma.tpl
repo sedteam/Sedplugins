@@ -24,7 +24,7 @@
 				<ul class="form responsive-form">
 					<li class="form-row">
 						<div class="form-field-100">
-							{PHP.L.comm}:<br />
+							{PHP.L.karma_comm}:<br />
 							{KARMA_CHANGE_REASON_MESSAGE}
 						</div>
 					</li>
