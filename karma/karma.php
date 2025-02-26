@@ -226,12 +226,12 @@ switch ($act) {
 }
 
 if (!empty($success_string)) {
-	$kt->assign("KARMA_SUCCESS", sed_alert($success_string, 's'));
+	$kt->assign("KARMA_SUCCESS", sed_alert($success_string, 's', false));
 	$kt->parse("MAIN.SUCCESS");
 }
 
 if (!empty($error_string)) {
-	$kt->assign("KARMA_ERROR", sed_alert($error_string, 'e'));
+	$kt->assign("KARMA_ERROR", sed_alert($error_string, 'e', false));
 	$kt->parse("MAIN.ERROR");
 }
 

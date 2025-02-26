@@ -32,23 +32,37 @@ if (!defined('SED_CODE')) {
 require_once("plugins/karma/lang/karma.".$usr['lang'].".lang.php");
 
 if (!isset($karma[$row['fp_posterid']]['karma']) || !$karma[$row['fp_posterid']]['karma']) {
-	$sql6 = sed_sql_query("SELECT SUM(karma_value) AS karma FROM sed_karma WHERE karma_recipient = {$row['fp_posterid']}");
-	$tmp = sed_sql_fetchassoc($sql6);
+    // Query the database to get the sum of karma values for the user
+    $sql6 = sed_sql_query("SELECT SUM(karma_value) AS karma FROM sed_karma WHERE karma_recipient = ".(int)$row['fp_posterid']);
+    $tmp = sed_sql_fetchassoc($sql6);
 
-	$tmp['karma'] = (empty($tmp['karma'])) ? 0 : $tmp['karma']; //правка значения для нулевой кармы
-	$karma_value = ($tmp['karma'] >= 100) ? 100 : $tmp['karma']; //правка цвета для очень большой кармы
-	$karma_value = ($tmp['karma'] <= -100) ? 100 : $karma_value; //правка цвета для очень большой кармы
+    // Adjust the karma value to 0 if it's empty
+    $tmp['karma'] = (empty($tmp['karma'])) ? 0 : $tmp['karma'];
 
-	$hex = dechex(floor(256 - abs($karma_value) * 2.56)); //просчет цвета
-	$hex = (strlen($hex) == 1) ? "0" . $hex : $hex; // правка цвета
-	$hex = ($hex == 100) ? "ff" : $hex; // для нулевой кармы
+    // Cap the karma value at 100 if it's greater than or equal to 100
+    $karma_value = ($tmp['karma'] >= 100) ? 100 : $tmp['karma'];
 
-	$color = ($karma_value > 0) ? $hex . "ff" . $hex : "ff" . $hex . $hex;
-	$color = ($karma_value == 0) ? "ffffff" : $color;
+    // Cap the karma value at -100 if it's less than or equal to -100
+    $karma_value = ($tmp['karma'] <= -100) ? 100 : $karma_value;
 
-	$karma[$row['fp_posterid']]['karma'] = $tmp['karma'];
-	$karma[$row['fp_posterid']]['color'] = $color;
+    // Calculate the hexadecimal color value based on the karma value
+    $hex = dechex(floor(256 - abs($karma_value) * 2.56));
+
+    // Ensure the hex value is two characters long
+    $hex = (strlen($hex) == 1) ? "0" . $hex : $hex;
+
+    // Adjust the hex value for zero karma
+    $hex = ($hex == 100) ? "ff" : $hex;
+
+    // Determine the final color based on the karma value
+    $color = ($karma_value > 0) ? $hex . "ff" . $hex : "ff" . $hex . $hex;
+    $color = ($karma_value == 0) ? "ffffff" : $color;
+
+    // Store the karma value and color in the karma array
+    $karma[$row['fp_posterid']]['karma'] = $tmp['karma'];
+    $karma[$row['fp_posterid']]['color'] = $color;
 }
+
 
 $modal = ($cfg['enablemodal']) ? 1 : 0;
 
