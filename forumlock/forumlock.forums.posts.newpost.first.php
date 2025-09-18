@@ -37,6 +37,3 @@ $passed_hours = floor($time_passed_reg / 3600);
 require_once("plugins/forumlock/lang/forumlock.".$usr['lang'].".lang.php");
 
 $error_string .= ($passed_hours < $forumlock_timehold) ? $L['forumlock_timehold'] . "<br />" : '';
-$error_string .= ($usr['profile']['user_postcount'] < $forumlock_nominpost) ? $L['forumlock_nominpost'] . "<br />" : '';
-
-
