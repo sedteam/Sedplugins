@@ -34,6 +34,6 @@ $forumlock_timehold = $cfg['plugin']['forumlock']['timehold'];
 $time_passed_reg = $sys['now_offset'] - $usr['profile']['user_regdate'];
 $passed_hours = floor($time_passed_reg / 3600);
 
-require_once("plugins/forumlock/lang/forumlock.".$usr['lang'].".lang.php");
+require_once("plugins/forumlock/lang/forumlock." . $usr['lang'] . ".lang.php");
 
 $error_string .= ($passed_hours < $forumlock_timehold) ? $L['forumlock_timehold'] . "<br />" : '';
