@@ -1,74 +1,18 @@
 <?php
-/*!
-* Hybridauth
-* https://hybridauth.github.io | https://github.com/hybridauth/hybridauth
-*  (c) 2017 Hybridauth authors | https://hybridauth.github.io/license.html
-*/
-
 namespace Hybridauth\Provider;
 
 use Hybridauth\Adapter\OAuth2;
 use Hybridauth\Exception\UnexpectedApiResponseException;
-use Hybridauth\Data\Collection;
-use Hybridauth\User\Profile;
 use Hybridauth\Data;
-use Hybridauth\User;
 
 /**
- * Vkontakte OAuth2 provider adapter.
- *
- * Example:
- *
- *   $config = [
- *       'callback' => Hybridauth\HttpClient\Util::getCurrentUrl(),
- *       'keys' => [
- *           'id' => '', // App ID
- *           'secret' => '' // Secure key
- *       ],
- *   ];
- *
- *   $adapter = new Hybridauth\Provider\Vkontakte($config);
- *
- *   try {
- *       if (!$adapter->isConnected()) {
- *           $adapter->authenticate();
- *       }
- *
- *       $userProfile = $adapter->getUserProfile();
- *   } catch (\Exception $e) {
- *       print $e->getMessage() ;
- *   }
+ * Vkontakte OAuth2 adapter for VK ID (OAuth 2.1)
  */
 class Vkontakte extends OAuth2
 {
-    const API_VERSION = '5.95';
-
-    const URL = 'https://vk.com/';
-
-    /**
-     * {@inheritdoc}
-     */
     protected $apiBaseUrl = 'https://api.vk.com/method/';
-
-    /**
-     * {@inheritdoc}
-     */
-    protected $authorizeUrl = 'https://api.vk.com/oauth/authorize';
-
-    /**
-     * {@inheritdoc}
-     */
-    protected $accessTokenUrl = 'https://api.vk.com/oauth/token';
-
-    /**
-     * {@inheritdoc}
-     */
-    protected $scope = 'email,offline';
-
-    /**
-     * {@inheritdoc}
-     */
-    protected $apiDocumentation = ''; // Not available
+    protected $authorizeUrl = 'https://id.vk.com/authorize';
+    protected $accessTokenUrl = 'https://id.vk.com/oauth2/auth';
 
     /**
      * {@inheritdoc}
@@ -77,140 +21,133 @@ class Vkontakte extends OAuth2
     {
         parent::initialize();
 
-        // The VK API requires version and access_token from authenticated users
-        // for each endpoint.
-        $accessToken = $this->getStoredData($this->accessTokenName);
-        $this->apiRequestParameters[$this->accessTokenName] = $accessToken;
-        $this->apiRequestParameters['v'] = static::API_VERSION;
-    }
+        $this->callback = rtrim($this->config->get('callback'), '/');
+        $this->AuthorizeUrlParameters['redirect_uri'] = $this->callback;
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function validateAccessTokenExchange($response)
-    {
-        $data = parent::validateAccessTokenExchange($response);
-
-        // Need to store email for later use.
-        $this->storeData('email', $data->get('email'));
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function hasAccessTokenExpired($time = null)
-    {
-        if ($time === null) {
-            $time = time();
+        $deviceId = $this->getStoredData('device_id');
+        if (!$deviceId) {
+            $deviceId = $this->generateRandomString(16);
+            $this->storeData('device_id', $deviceId);
         }
 
-        // If we are using offline scope, $expired will be false.
-        $expired = $this->getStoredData('expires_in')
-            ? $this->getStoredData('expires_at') <= $time
-            : false;
+        $codeVerifier = $this->getStoredData('code_verifier');
+        if (!$codeVerifier) {
+            $codeVerifier = $this->generateRandomString(64);
+            $this->storeData('code_verifier', $codeVerifier);
+        }
 
-        return $expired;
+        $this->AuthorizeUrlParameters['device_id'] = $deviceId;
+        $this->AuthorizeUrlParameters['code_challenge'] = $this->generateCodeChallenge($codeVerifier);
+        $this->AuthorizeUrlParameters['code_challenge_method'] = 'S256';
+        $this->AuthorizeUrlParameters['v'] = '5.131';
     }
 
     /**
+     * {@inheritdoc}
+     */
+    protected function exchangeCodeForAccessToken($code)
+    {
+        $receivedDeviceId = isset($_GET['device_id']) ? $_GET['device_id'] : $this->getStoredData('device_id');
+        $codeVerifier = $this->getStoredData('code_verifier');
+
+        $this->tokenExchangeParameters = [
+            'client_id'     => $this->clientId,
+            'client_secret' => $this->clientSecret,
+            'grant_type'    => 'authorization_code',
+            'code'          => $code,
+            'redirect_uri'  => $this->callback,
+            'device_id'     => $receivedDeviceId,
+            'code_verifier' => $codeVerifier,
+        ];
+
+        $response = $this->httpClient->request(
+            $this->accessTokenUrl,
+            'POST',
+            $this->tokenExchangeParameters
+        );
+
+        $this->validateApiResponse('Unable to exchange code for API access token');
+
+        return $response;
+    }
+
+	/**
      * {@inheritdoc}
      */
     public function getUserProfile()
     {
-        $photoField = 'photo_' . ($this->config->get('photo_size') ?: 'max_orig');
-
-        $response = $this->apiRequest('users.get', 'GET', [
-            'fields' => 'screen_name,sex,education,bdate,has_photo,' . $photoField,
+        $response = $this->apiRequest('https://id.vk.com/oauth2/user_info', 'POST', [
+            'client_id'    => $this->clientId,
+            'access_token' => $this->getStoredData('access_token')
         ]);
 
-        if (property_exists($response, 'error')) {
-            throw new UnexpectedApiResponseException($response->error->error_msg);
-        }
-
-        $data = new Collection($response->response[0]);
-
-        if (!$data->exists('id')) {
+        if (!isset($response->user)) {
             throw new UnexpectedApiResponseException('Provider API returned an unexpected response.');
         }
 
-        $userProfile = new Profile();
+        $userInfo = $response->user;
+        $userProfile = new \Hybridauth\User\Profile();
+        
+        $userProfile->identifier  = isset($userInfo->user_id) ? $userInfo->user_id : null;
+        $userProfile->firstName   = isset($userInfo->first_name) ? $userInfo->first_name : null;
+        $userProfile->lastName    = isset($userInfo->last_name) ? $userInfo->last_name : null;
+        $userProfile->photoURL    = isset($userInfo->avatar) ? $userInfo->avatar : null;
+        $userProfile->phone       = isset($userInfo->phone) ? $userInfo->phone : null;
+        
+        $email = isset($userInfo->email) ? $userInfo->email : (isset($response->email) ? $response->email : null);
+        $userProfile->email = $email;
 
-        $userProfile->identifier = $data->get('id');
-        $userProfile->email = $this->getStoredData('email');
-        $userProfile->firstName = $data->get('first_name');
-        $userProfile->lastName = $data->get('last_name');
-        $userProfile->displayName = $data->get('screen_name');
-        $userProfile->photoURL = $data->get('has_photo') === 1 ? $data->get($photoField) : '';
-
-        // Handle b-date.
-        if ($data->get('bdate')) {
-            $bday = explode('.', $data->get('bdate'));
-            $userProfile->birthDay = (int)$bday[0];
-            $userProfile->birthMonth = (int)$bday[1];
-            $userProfile->birthYear = (int)$bday[2];
+        if (!empty($email)) {
+            $parts = explode('@', $email);
+            $userProfile->displayName = $parts[0];
+        } else {
+            $userProfile->displayName = trim($userProfile->firstName . ' ' . $userProfile->lastName);
         }
 
-        $userProfile->data = [
-            'education' => $data->get('education'),
-        ];
+        if (empty($userProfile->displayName)) {
+            $userProfile->displayName = 'vk_user_' . $userProfile->identifier;
+        }
 
-        $screen_name = static::URL . ($data->get('screen_name') ?: 'id' . $data->get('id'));
-        $userProfile->profileURL = $screen_name;
+        $userProfile->profileURL = 'https://vk.com/id' . $userProfile->identifier;
 
-        switch ($data->get('sex')) {
+        if (!empty($userInfo->birthday)) {
+            $bday = explode('.', $userInfo->birthday);
+            $userProfile->birthDay   = isset($bday[0]) ? (int)$bday[0] : null;
+            $userProfile->birthMonth = isset($bday[1]) ? (int)$bday[1] : null;
+            $userProfile->birthYear  = isset($bday[2]) ? (int)$bday[2] : null;
+        }
+
+        $gender = isset($userInfo->gender) ? (int)$userInfo->gender : 0;
+        switch ($gender) {
             case 1:
                 $userProfile->gender = 'female';
                 break;
-
             case 2:
                 $userProfile->gender = 'male';
                 break;
         }
 
+        $userProfile->data = [
+            'education' => isset($userInfo->education) ? $userInfo->education : null,
+        ];
+
         return $userProfile;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getUserContacts()
+    protected function generateRandomString($length = 64)
     {
-        $response = $this->apiRequest('friends.get', 'GET', [
-            'fields' => 'uid,name,photo_200_orig',
-        ]);
-
-        $data = new Data\Collection($response);
-        if (!$data->exists('response')) {
-            throw new UnexpectedApiResponseException('Provider API returned an unexpected response.');
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $randomString = '';
+        $max = strlen($characters) - 1;
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[mt_rand(0, $max)];
         }
-
-        $contacts = [];
-        if (!$data->filter('response')->filter('items')->isEmpty()) {
-            foreach ($data->filter('response')->filter('items')->toArray() as $item) {
-                $contacts[] = $this->fetchUserContact($item);
-            }
-        }
-
-        return $contacts;
+        return $randomString;
     }
 
-    /**
-     * Parse the user contact.
-     *
-     * @param array $item
-     *
-     * @return \Hybridauth\User\Contact
-     */
-    protected function fetchUserContact($item)
+    protected function generateCodeChallenge($verifier)
     {
-        $userContact = new User\Contact();
-        $data = new Data\Collection($item);
-
-        $userContact->identifier = $data->get('id');
-        $userContact->displayName = sprintf('%s %s', $data->get('first_name'), $data->get('last_name'));
-        $userContact->profileURL = static::URL . ($data->get('screen_name') ?: 'id' . $data->get('id'));
-        $userContact->photoURL = $data->get('photo_200_orig');
-
-        return $userContact;
+        $hash = hash('sha256', $verifier, true);
+        return rtrim(strtr(base64_encode($hash), '+/', '-_'), '=');
     }
 }
