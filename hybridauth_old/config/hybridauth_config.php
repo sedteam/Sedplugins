@@ -1,11 +1,10 @@
 <?php
 
-$ha_base = rtrim($sys['abs_url'], '/');
-$config_hybridauth = [
+$config_hybridauth = [   
     'providers' => [
         'Google' => [
             'enabled' => true,
-            'callback' => $ha_base . '?oauth_provider=Google',
+			'callback' => $sys['abs_url'].'login?provider=Google',	
             'keys' => [
                 'id' => 'your-google-client-id',
                 'secret' => 'your-google-client-secret',
@@ -16,7 +15,7 @@ $config_hybridauth = [
         ],
         'Yandex' => [
             'enabled' => true,
-            'callback' => $ha_base . '?oauth_provider=Yandex',
+			'callback' => $sys['abs_url'].'login?provider=Yandex',
             'keys' => [
                 'id' => 'your-yandex-client-id',
                 'secret' => 'your-yandex-client-secret',
@@ -24,22 +23,21 @@ $config_hybridauth = [
         ],
         'VKontakte' => [
             'enabled' => true,
-            'callback' => $ha_base . '?oauth_provider=Vkontakte',
+			'callback' => $sys['abs_url'].'login?provider=Vkontakte',
             'keys' => [
                 'id' => 'your-vk-client-id',
                 'secret' => 'your-vk-client-secret',
             ],
             'scope' => 'email',
-        ],
+        ],		
         'Mailru' => [
             'enabled' => true,
-            'callback' => $ha_base . '?oauth_provider=Mailru',
             'keys' => [
                 'id' => 'your-mailru-client-id',
                 'secret' => 'your-mailru-client-secret',
             ],
         ],
     ],
-    'debug_mode' => false,
-    'debug_file' => SED_ROOT . '/plugins/hybridauth/hybridauth.log'
+	'debug_mode' => false,
+	'debug_file' => SED_ROOT . '/plugins/hybridauth/hybridauth.log'
 ];
