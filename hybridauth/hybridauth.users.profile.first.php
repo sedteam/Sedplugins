@@ -41,7 +41,7 @@ if ($a === 'oauthunlink') {
 	sed_check_xg();
 	$sql = sed_sql_query("SELECT user_email FROM $db_users WHERE user_id='" . (int)$usr['id'] . "' LIMIT 1");
 	$row = sed_sql_fetchassoc($sql);
-	if (!$row || empty(trim($row['user_email']))) {
+	if (!$row || trim(isset($row['user_email']) ? (string) $row['user_email'] : '') === '') {
 		sed_redirect(sed_url("users", "m=profile&oauth_error=no_email", "", true));
 		exit;
 	}

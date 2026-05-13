@@ -29,8 +29,8 @@ if (!defined('SED_CODE')) {
 
 $oauth_block = '';
 $providers = isset($config_hybridauth['providers']) ? $config_hybridauth['providers'] : [];
-$has_email = !empty(trim($urr['user_email'] ?? ''));
-$attached = !empty(trim($urr['user_oauth_provider'] ?? ''));
+$has_email = !empty(trim(isset($urr['user_email']) ? $urr['user_email'] : ''));
+$attached = !empty(trim(isset($urr['user_oauth_provider']) ? $urr['user_oauth_provider'] : ''));
 
 if ($attached) {
 	$oauth_block .= '<p><strong>Attached: ' . sed_cc($urr['user_oauth_provider']) . '</strong></p>';

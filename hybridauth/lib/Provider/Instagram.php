@@ -9,6 +9,7 @@ namespace Hybridauth\Provider;
 
 use Hybridauth\Adapter\OAuth2;
 use Hybridauth\Data\Collection;
+use Hybridauth\Exception\InvalidArgumentException;
 use Hybridauth\Exception\UnexpectedApiResponseException;
 use Hybridauth\User;
 
@@ -180,9 +181,14 @@ class Instagram extends OAuth2
      * @throws \Hybridauth\Exception\HttpRequestFailedException
      * @throws \Hybridauth\Exception\InvalidAccessTokenException
      * @throws \Hybridauth\Exception\UnexpectedApiResponseException
+     * @throws \Hybridauth\Exception\InvalidArgumentException
      */
-    public function getUserMedia($limit = 12, $pageId = null, array $fields = null)
+    public function getUserMedia($limit = 12, $pageId = null, $fields = null)
     {
+        if ($fields !== null && !is_array($fields)) {
+            throw new InvalidArgumentException('Parameter fields must be an array or null.');
+        }
+
         if (empty($fields)) {
             $fields = [
                 'id',
@@ -226,9 +232,14 @@ class Instagram extends OAuth2
      * @throws \Hybridauth\Exception\HttpRequestFailedException
      * @throws \Hybridauth\Exception\InvalidAccessTokenException
      * @throws \Hybridauth\Exception\UnexpectedApiResponseException
+     * @throws \Hybridauth\Exception\InvalidArgumentException
      */
-    public function getMedia($mediaId, array $fields = null)
+    public function getMedia($mediaId, $fields = null)
     {
+        if ($fields !== null && !is_array($fields)) {
+            throw new InvalidArgumentException('Parameter fields must be an array or null.');
+        }
+
         if (empty($fields)) {
             $fields = [
                 'id',

@@ -4,10 +4,11 @@
  * to suit your application's environment.
  *
  * Note that you'd ONLY need this file if you are not using composer.
+ * Requires PHP 5.6+ (Hybridauth 3 bundled with this plugin).
  */
 
-if (version_compare(PHP_VERSION, '5.4.0', '<')) {
-    throw new Exception('Hybridauth 3 requires PHP version 5.4 or higher.');
+if (version_compare(PHP_VERSION, '5.6.0', '<')) {
+    throw new Exception('Hybridauth 3 requires PHP version 5.6 or higher.');
 }
 
 /**

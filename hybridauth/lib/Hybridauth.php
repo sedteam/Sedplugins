@@ -54,22 +54,28 @@ class Hybridauth
 
     /**
      * @param array|string $config Array with configuration or Path to PHP file that will return array
-     * @param HttpClientInterface $httpClient
-     * @param StorageInterface $storage
-     * @param LoggerInterface $logger
+     * @param HttpClientInterface|null $httpClient
+     * @param StorageInterface|null $storage
+     * @param LoggerInterface|null $logger
      *
      * @throws InvalidArgumentException
      */
-    public function __construct(
-        $config,
-        HttpClientInterface $httpClient = null,
-        StorageInterface $storage = null,
-        LoggerInterface $logger = null
-    ) {
+    public function __construct($config, $httpClient = null, $storage = null, $logger = null)
+    {
         if (is_string($config) && file_exists($config)) {
             $config = include $config;
         } elseif (!is_array($config)) {
             throw new InvalidArgumentException('Hybridauth config does not exist on the given path.');
+        }
+
+        if ($httpClient !== null && !($httpClient instanceof HttpClientInterface)) {
+            throw new InvalidArgumentException('Http client must implement HttpClientInterface.');
+        }
+        if ($storage !== null && !($storage instanceof StorageInterface)) {
+            throw new InvalidArgumentException('Storage must implement StorageInterface.');
+        }
+        if ($logger !== null && !($logger instanceof LoggerInterface)) {
+            throw new InvalidArgumentException('Logger must implement LoggerInterface.');
         }
 
         $this->config = $config + [

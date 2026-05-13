@@ -86,16 +86,12 @@ abstract class AbstractAdapter implements AdapterInterface
      * Common adapters constructor.
      *
      * @param array $config
-     * @param HttpClientInterface $httpClient
-     * @param StorageInterface $storage
-     * @param LoggerInterface $logger
+     * @param HttpClientInterface|null $httpClient
+     * @param StorageInterface|null $storage
+     * @param LoggerInterface|null $logger
      */
-    public function __construct(
-        $config = [],
-        HttpClientInterface $httpClient = null,
-        StorageInterface $storage = null,
-        LoggerInterface $logger = null
-    ) {
+    public function __construct($config = [], $httpClient = null, $storage = null, $logger = null)
+    {
         $this->providerId = (new \ReflectionClass($this))->getShortName();
 
         $this->config = new Data\Collection($config);
@@ -243,8 +239,12 @@ abstract class AbstractAdapter implements AdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function setHttpClient(HttpClientInterface $httpClient = null)
+    public function setHttpClient($httpClient = null)
     {
+        if ($httpClient !== null && !($httpClient instanceof HttpClientInterface)) {
+            throw new InvalidArgumentException('Http client must implement HttpClientInterface.');
+        }
+
         $this->httpClient = $httpClient ?: new HttpClient();
 
         if ($this->config->exists('curl_options') && method_exists($this->httpClient, 'setCurlOptions')) {
@@ -263,8 +263,12 @@ abstract class AbstractAdapter implements AdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function setStorage(StorageInterface $storage = null)
+    public function setStorage($storage = null)
     {
+        if ($storage !== null && !($storage instanceof StorageInterface)) {
+            throw new InvalidArgumentException('Storage must implement StorageInterface.');
+        }
+
         $this->storage = $storage ?: new Session();
     }
 
@@ -279,8 +283,12 @@ abstract class AbstractAdapter implements AdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function setLogger(LoggerInterface $logger = null)
+    public function setLogger($logger = null)
     {
+        if ($logger !== null && !($logger instanceof LoggerInterface)) {
+            throw new InvalidArgumentException('Logger must implement LoggerInterface.');
+        }
+
         $this->logger = $logger ?: new Logger(
             $this->config->get('debug_mode'),
             $this->config->get('debug_file')

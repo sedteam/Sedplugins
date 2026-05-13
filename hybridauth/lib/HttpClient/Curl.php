@@ -170,7 +170,10 @@ class Curl implements HttpClientInterface
             }
         }
 
-        curl_close($curl);
+        // curl_close() is deprecated since PHP 8.5 (no-op since PHP 8.0 for CurlHandle).
+        if (is_resource($curl)) {
+            curl_close($curl);
+        }
 
         return $this->responseBody;
     }
