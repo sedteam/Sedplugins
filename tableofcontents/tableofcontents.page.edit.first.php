@@ -1,17 +1,12 @@
-<?PHP
-
+<?php
 /* ====================
-Seditio - Website engine
-Copyright Neocrome
-https://seditio.org
-
 [BEGIN_SED]
 File=plugins/tableofcontents/tableofcontents.page.edit.first.php
-Version=179
-Updated=2023-may-02
+Version=185
+Updated=2026-jul-07
 Type=Plugin
 Author=Amro
-Description=
+Description=Inject generated TOC on page edit
 [END_SED]
 
 [BEGIN_SED_EXTPLUGIN]
@@ -23,15 +18,18 @@ Tags=
 Minlevel=0
 Order=11
 [END_SED_EXTPLUGIN]
-
 ==================== */
 
 if (!defined('SED_CODE')) { die('Wrong URL.'); }
 
-$tbc_extraslot = $cfg['plugin']['tableofcontents']['tbc_extra'];
+require_once(SED_ROOT . '/plugins/tableofcontents/inc/tableofcontents.functions.php');
 
-$rpagetbcextra = 'rpage'.$tbc_extraslot;
-$pagetbcextra = 'page_'.$tbc_extraslot;
+// Import the submitted updated page text
+$rpagetext = sed_import('rpagetext', 'P', 'HTM');
 
+// Generate TOC data
+$tbc_data = sed_generate_tbc($rpagetext);
 
+// Inject TOC contents into $_POST so Seditio's extrafield builder picks it up
+$_POST['rpagetbc'] = $tbc_data['tbc_contents'];
 ?>

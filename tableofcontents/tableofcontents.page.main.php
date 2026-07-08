@@ -1,5 +1,4 @@
-<?PHP
-
+<?php
 /* ====================
 Seditio - Website engine
 Copyright Neocrome
@@ -7,11 +6,11 @@ https://seditio.org
 
 [BEGIN_SED]
 File=plugins/tableofcontents/tableofcontents.page.main.php
-Version=179
-Updated=2023-may-02
+Version=185
+Updated=2026-jul-07
 Type=Plugin
 Author=Amro
-Description=
+Description=Process page text anchors on page view
 [END_SED]
 
 [BEGIN_SED_EXTPLUGIN]
@@ -23,71 +22,25 @@ Tags=page.tpl
 Minlevel=0
 Order=10
 [END_SED_EXTPLUGIN]
-
 ==================== */
 
 if (!defined('SED_CODE')) { die('Wrong URL.'); }
 
-function generate_tbc($content) {
-	global $pag;
-	
-	// Если в тексте нет заголовков от h1 до h5 - выходим
-	if (!preg_match_all('#<h([1-5])[^<>]*>(.*?)</h[1-5]>#', $content, $headers)) {return;}
-	
-	// Если заголовков меньше 2х - тоже выходим
-	if (count($headers[0]) < 2) {return;}
+require_once(SED_ROOT . '/plugins/tableofcontents/inc/tableofcontents.functions.php');
 
-	$base = $pag['page_pageurl'];
-	$from = $to = $result = array();
-	$depth = 0;
-	$start = null;
-	
-	// Генерация меню
-	$tbc_contents = '<ul class="level-1">';
-	foreach ($headers[2] as $i => $header) {
-		$header = preg_replace('#\s+#', ' ', trim(rtrim($header, ':!.?;')));
-		$anchor = sed_translit_seourl(str_replace(' ', '-', $header));
-		$header = "<a href=\"{$base}#{$anchor}\">{$header}</a>";
+// Dynamically generate the anchors and TOC content
+$tbc_data = sed_generate_tbc($pag['page_text']);
 
-		if ($depth > 0) {
-			if ($headers[1][$i] > $depth) {
-				while ($headers[1][$i] > $depth) {
-					$tbc_contents .= "<ul class=\"level-".$depth."\">";
-					$depth++;
-				}
-			}
-			elseif ($headers[1][$i] < $depth) {
-				while ($headers[1][$i] < $depth) {
-					$tbc_contents .= '</ul>';
-					$depth --;
-				}
-			}
-		}
-		$depth = $headers[1][$i];
-		if ($start === null) {
-			$start = $depth;
-		}
-		$tbc_contents .= '<li>' . $header . '</li>';
+// Inject anchor-linked headers into page content
+$pag['page_text'] = $tbc_data['content'];
 
-		$from[$i] = $headers[0][$i];
-		$to[$i] = '<a name="' . $anchor . '" class="page-contents-link"></a>' . $headers[0][$i];
-	}
-	// Закрытие всех открытых списков
-	for ($i = 0; $i <= ($depth - $start); $i ++) {
-		$tbc_contents .= "</ul>";
-	}
-	// Добавление якорей к заголовкам
-	$content = str_replace($from, $to, $content);
-	
-	$result['tbc_contents'] = $tbc_contents; // оглавление
-	$result['content'] = $content; // контент с заголовками
-	
-	return $result;
+// Fallback for pages that did not cache the TOC previously
+if (empty($pag['page_tbc']) && !empty($tbc_data['tbc_contents'])) {
+	$pag['page_tbc'] = $tbc_data['tbc_contents'];
 }
 
-$page_tbc = generate_tbc($pag['page_text']);
-
-$pag['page_tbc'] = $page_tbc['tbc_contents'];
-$pag['page_text'] = $page_tbc['content'];
-
+// Register stylesheet before system/header.php is loaded
+if (!empty($pag['page_tbc'])) {
+	sed_add_css('plugins/tableofcontents/css/tbc.css', true);
+}
 ?>
