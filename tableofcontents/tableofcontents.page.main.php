@@ -34,8 +34,8 @@ $tbc_data = sed_generate_tbc($pag['page_text']);
 // Inject anchor-linked headers into page content
 $pag['page_text'] = $tbc_data['content'];
 
-// Fallback for pages that did not cache the TOC previously
-if (empty($pag['page_tbc']) && !empty($tbc_data['tbc_contents'])) {
+// Check config option to decide if we use caching or generate on the fly
+if ($cfg['plugin']['tableofcontents']['use_cache'] == 'no' || empty($pag['page_tbc'])) {
 	$pag['page_tbc'] = $tbc_data['tbc_contents'];
 }
 

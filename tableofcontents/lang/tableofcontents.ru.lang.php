@@ -17,4 +17,5 @@ Description=Russian localization for Table of Contents plugin
 if (!defined('SED_CODE')) { die('Wrong URL.'); }
 
 $L['tableofcontents_title'] = "Содержание";
+$L['cfg_use_cache'] = array('Использовать кэширование', 'Сохранять оглавление в базу данных. Выберите "no" для корректной работы мультиязычности (динамическая генерация).');
 ?>

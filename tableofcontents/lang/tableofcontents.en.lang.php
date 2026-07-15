@@ -17,4 +17,5 @@ Description=English localization for Table of Contents plugin
 if (!defined('SED_CODE')) { die('Wrong URL.'); }
 
 $L['tableofcontents_title'] = "Table of Contents";
+$L['cfg_use_cache'] = array('Use caching', 'Cache generated TOC in the database. Choose "no" for proper multilingual support (dynamic generation).');
 ?>

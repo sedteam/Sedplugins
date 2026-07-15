@@ -30,6 +30,7 @@ Lock_members=W12345A
 [END_SED_EXTPLUGIN]
 
 [BEGIN_SED_EXTPLUGIN_CONFIG]
+use_cache=01:select:yes,no:yes:Use caching for table of contents
 [END_SED_EXTPLUGIN_CONFIG]
 ==================== */
 
