@@ -6,8 +6,8 @@ Copyright (c) Seditio Team
 https://seditio.org
 [BEGIN_SED]
 File=plugins/hybridauth/hybridauth.users.auth.tags.php
-Version=181
-Updated=2026-mar-15
+Version=186
+Updated=2026-jul-28
 Type=Plugin
 Author=Amro
 Description=OAuth buttons on login form
@@ -27,20 +27,11 @@ if (!defined('SED_CODE')) {
 	die('Wrong URL.');
 }
 
+// Build buttons
 $oauth_buttons = '';
-if (file_exists(SED_ROOT . '/plugins/hybridauth/config/hybridauth_config.php')) {
-	require_once(SED_ROOT . '/plugins/hybridauth/config/hybridauth_config.php');
-	$providers = isset($config_hybridauth['providers']) ? $config_hybridauth['providers'] : [];
-	$ha_base = rtrim($sys['abs_url'], '/');
-	$redirect_param = !empty($redirect) ? '&redirect=' . urlencode($redirect) : '';
-	foreach ($providers as $name => $p) {
-		if (empty($p['enabled'])) {
-			continue;
-		}
-		$url = $ha_base . '?oauth_provider=' . urlencode($name) . $redirect_param;
-		$oauth_buttons .= '<a href="' . sed_cc($url) . '" class="btn-social">' . sed_cc($name) . '</a> ';
-	}
-	$oauth_buttons = trim($oauth_buttons);
+if (isset($config_hybridauth['providers']) && is_array($config_hybridauth['providers'])) {
+	$redir = !empty($redirect) ? $redirect : '';
+	$oauth_buttons = sed_hybridauth_buttons($config_hybridauth['providers'], 'hybridauth_or_login_via', $redir);
 }
 
 $t->assign('USERS_AUTH_OAUTH_BUTTONS', $oauth_buttons);

@@ -5,19 +5,19 @@ Seditio - Website engine
 Copyright (c) Seditio Team
 https://seditio.org
 [BEGIN_SED]
-File=plugins/hybridauth/hybridauth.users.profile.first.php
+File=plugins/hybridauth/hybridauth.users.auth.first.php
 Version=186
 Updated=2026-jul-28
 Type=Plugin
 Author=Amro
-Description=Load CSS and lang before profile page header
+Description=Load CSS and lang before auth page header
 [END_SED]
 
 [BEGIN_SED_EXTPLUGIN]
 Code=hybridauth
-Part=profile.first
-File=hybridauth.users.profile.first
-Hooks=profile.first
+Part=auth.first
+File=hybridauth.users.auth.first
+Hooks=users.auth.first
 Tags=
 Order=10
 [END_SED_EXTPLUGIN]

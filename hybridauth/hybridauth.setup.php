@@ -7,8 +7,8 @@ http://www.neocrome.net
 https://seditio.org
 [BEGIN_SED]
 File=plugins/hybridauth/hybridauth.setup.php
-Version=180
-Updated=2025-feb-07
+Version=186
+Updated=2026-jul-28
 Type=Plugin
 Author=Amro
 Description=
@@ -16,12 +16,12 @@ Description=
 
 [BEGIN_SED_EXTPLUGIN]
 Code=hybridauth
-Name=Hybridauth 1.0
-Description=HybridAuth Social Login
-Version=180
-Date=2025-feb-07
+Name=Hybridauth 2.0
+Description=Social login via OAuth (VK, Yandex, Google, Sber ID, etc.)
+Version=2.0.0
+Date=2026-jul-28
 Author=Amro
-Copyright=Amro
+Copyright=Amro & Seditio Team
 Notes=
 SQL=
 Auth_guests=R
